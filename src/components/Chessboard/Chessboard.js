@@ -1,5 +1,5 @@
-import React from "react";
-import "../styles/chessboard.css";
+import "./chessboard.css";
+import Tile from "../Tile/Tile";
 
 const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
@@ -11,18 +11,7 @@ const Chessboard = () => {
   for (let j = verticalAxis.length - 1; j >= 0; j--) {
     for (let i = 0; i < horizantalAxis.length; i++) {
       const number = i + j + 2;
-
-      if (number % 2 === 0) {
-        board.push(
-          <div className="tile dark-tile">
-          </div>
-        );
-      } else {
-        board.push(
-          <div className="tile light-tile">
-          </div>
-        );
-      }
+      board.push(<Tile number={number}/>)
     }
   }
 

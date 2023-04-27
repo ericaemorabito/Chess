@@ -1,0 +1,12 @@
+.tile {
+  height: 100px;
+  width: 100px;
+}
+
+.dark-tile {
+  background: url('../../assets/images/green-tile.png');
+}
+
+.light-tile {
+background: url('../../assets/images/white-tile.png');
+}
