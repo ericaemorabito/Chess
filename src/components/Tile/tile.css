@@ -1,12 +1,18 @@
 .tile {
   height: 100px;
   width: 100px;
+  display: grid;
+  place-content: center;
 }
 
 .dark-tile {
-  background: url('../../assets/images/green-tile.png');
+  background: url('../../../public/assets/images/green-tile.png');
 }
 
 .light-tile {
-background: url('../../assets/images/white-tile.png');
+background: url('../../../public/assets/images/white-tile.png');
+}
+
+.tile img {
+  width: 70px;
 }
