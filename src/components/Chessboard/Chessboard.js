@@ -1,48 +1,49 @@
 import "./chessboard.css";
 import Tile from "../Tile/Tile";
+import { act } from "react-dom/test-utils";
 
 const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const horizantalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 const pieces = [];
 
-for(let p = 0; p <2; p++) {
-  const type = p === 0 ? 'black-' : 'white-';
+for (let p = 0; p < 2; p++) {
+  const type = p === 0 ? "black-" : "white-";
   const y = p === 0 ? 7 : 0;
   // ROOKS
   pieces.push({
     image: `assets/images/${type}rook.png`,
     x: 0,
-    y
+    y,
   });
   pieces.push({
     image: `assets/images/${type}rook.png`,
     x: 7,
-    y
+    y,
   });
-  
+
   // KNIGHTS
   pieces.push({
     image: `assets/images/${type}knight.png`,
     x: 1,
-    y
+    y,
   });
   pieces.push({
     image: `assets/images/${type}knight.png`,
     x: 6,
-    y
+    y,
   });
 
   //BISHOPS
   pieces.push({
     image: `assets/images/${type}bishop.png`,
     x: 2,
-    y
+    y,
   });
   pieces.push({
     image: `assets/images/${type}bishop.png`,
     x: 5,
-    y
+    y,
   });
 }
 // Dark Pawns inital position
@@ -84,6 +85,45 @@ pieces.push({
   y: 0,
 });
 
+// ACTIVE PIECE
+let activePiece = null;
+
+// GRAB PIECE
+function grabPiece(e) {
+  const element = e.target;
+  if (element.classList.contains("chess-piece")) {
+    const x = e.clientX - 50;
+    const y = e.clientY - 50;
+    element.style.position = "absolute";
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
+
+    activePiece = element;
+  }
+}
+
+// MOVE PIECE
+function movePiece(e) {
+  if (activePiece) {
+    const x = e.clientX - 50;
+    const y = e.clientY - 50;
+    activePiece.style.position = "absolute";
+    activePiece.style.left = `${x}px`;
+    activePiece.style.top = `${y}px`;
+  }
+}
+
+// DROP PIECE
+function dropPiece(e){
+  // RESET ACTIVE PIECE
+  if(activePiece){
+    activePiece = null;
+  }
+
+  
+
+}
+
 const Chessboard = () => {
   let board = [];
 
@@ -98,11 +138,20 @@ const Chessboard = () => {
         }
       });
 
-      board.push(<Tile number={number} image={image} />);
+      board.push(<Tile key={`${i},${j}`} number={number} image={image} />);
     }
   }
 
-  return <div id="chessboard">{board}</div>;
+  return (
+    <div
+      id="chessboard"
+      onMouseDown={(e) => grabPiece(e)}
+      onMouseMove={(e) => movePiece(e)}
+      onMouseUp={(e) => dropPiece(e)}
+    >
+      {board}
+    </div>
+  );
 };
 
 export default Chessboard;
