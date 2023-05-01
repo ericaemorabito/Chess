@@ -1,113 +1,132 @@
 import "./chessboard.css";
 import Tile from "../Tile/Tile";
-import { act } from "react-dom/test-utils";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import Referee from "../Referee/Referee";
 
 const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const horizantalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-const pieces = [];
+const initalBoardState = [];
 
 for (let p = 0; p < 2; p++) {
-  const type = p === 0 ? "black-" : "white-";
+  const type = p === 0 ? "black" : "white";
   const y = p === 0 ? 7 : 0;
-  // ROOKS
-  pieces.push({
-    image: `assets/images/${type}rook.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-rook.png`,
     x: 0,
     y,
+    type: 'ROOK',
+    team: `${type}`
   });
-  pieces.push({
-    image: `assets/images/${type}rook.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-rook.png`,
     x: 7,
     y,
+    type: 'ROOK',
+    team: `${type}`
   });
-
-  // KNIGHTS
-  pieces.push({
-    image: `assets/images/${type}knight.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-knight.png`,
     x: 1,
     y,
+    type: 'KNIGHT',
+    team: `${type}`
   });
-  pieces.push({
-    image: `assets/images/${type}knight.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-knight.png`,
     x: 6,
     y,
+    type: 'KNIGHT',
+    team: `${type}`
   });
-
-  //BISHOPS
-  pieces.push({
-    image: `assets/images/${type}bishop.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-bishop.png`,
     x: 2,
     y,
+    type: 'BISHOP',
+    team: `${type}`
   });
-  pieces.push({
-    image: `assets/images/${type}bishop.png`,
+  initalBoardState.push({
+    image: `assets/images/${type}-bishop.png`,
     x: 5,
     y,
+    type: 'BISHOP',
+    team: `${type}`
   });
 }
-// Dark Pawns inital position
 for (let i = 0; i <= 7; i++) {
-  pieces.push({
+  initalBoardState.push({
     image: "assets/images/dark-pawn.png",
     x: i,
     y: 6,
+    type: 'PAWN',
+    team: 'black'
   });
 }
-// White Pawns inital position
 for (let i = 0; i <= 7; i++) {
-  pieces.push({
+  initalBoardState.push({
     image: "assets/images/white-pawn.png",
     x: i,
     y: 1,
+    type: 'PAWN',
+    team: 'white'
   });
 }
-// Dark King & Queen  inital position
-pieces.push({
+initalBoardState.push({
   image: "assets/images/black-king.png",
   x: 3,
   y: 7,
+  type: 'KING',
+  team: 'black'
 });
-pieces.push({
+initalBoardState.push({
   image: "assets/images/black-queen.png",
   x: 4,
   y: 7,
+  type: 'QUEEN',
+  team: 'black'
 });
-// Light King & Queen  inital position
-pieces.push({
+initalBoardState.push({
   image: "assets/images/white-king.png",
   x: 4,
   y: 0,
+  type: 'KING',
+  team: 'white'
 });
-pieces.push({
+initalBoardState.push({
   image: "assets/images/white-queen.png",
   x: 3,
   y: 0,
+  type: 'QUEEN',
+  team: 'white'
 });
 
 const Chessboard = () => {
-  // REFEREE
+  const [activePiece, setActivePiece] = useState(null)
+  const [gridX, setGridX] = useState(0);
+  const [gridY, setGridY] = useState(0);
+  const [pieces, setPieces] = useState(initalBoardState);
   const chessboardRef = useRef(null);
+  const referee = new Referee();
 
-  // ACTIVE PIECE
-  let activePiece = null;
-
-  // GRAB PIECE
   function grabPiece(e) {
     const element = e.target;
-    if (element.classList.contains("chess-piece")) {
+    const chessboard = chessboardRef.current;
+    if (element.classList.contains("chess-piece") && chessboard) {
+      const gridX = Math.floor((e.clientX - chessboard.offsetLeft) / 100);
+      const gridY = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100));
+      setGridX(gridX);
+      setGridY(gridY);
       const x = e.clientX - 50;
       const y = e.clientY - 50;
       element.style.position = "absolute";
       element.style.left = `${x}px`;
       element.style.top = `${y}px`;
 
-      activePiece = element;
+      setActivePiece(element);
     }
   }
 
-  // MOVE PIECE
   function movePiece(e) {
     const chessboard = chessboardRef.current;
 
@@ -151,11 +170,32 @@ const Chessboard = () => {
     }
   }
 
-  // DROP PIECE
   function dropPiece(e) {
-    // RESET ACTIVE PIECE
-    if (activePiece) {
-      activePiece = null;
+    const chessboard = chessboardRef.current;
+    if (activePiece && chessboard) {
+      const x = Math.floor((e.clientX - chessboard.offsetLeft) / 100);
+      const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100));
+
+      setPieces((value) => {
+        const pieces = value.map((p) => {
+          if (p.x === gridX && p.y === gridY) {
+            // Check is move is valid
+            const validMove = referee.isValidMove(gridX, gridY, x, y, p.type, p.team);
+            // is move is valid - set locations
+            if (validMove){
+              p.x = x;
+              p.y = y;
+            } else {
+              activePiece.style.position = 'relative';
+              activePiece.style.removeProperty('top');
+              activePiece.style.removeProperty('left');
+            }
+          }
+          return p;
+        });
+        return pieces;
+      });
+      setActivePiece(null);
     }
   }
 
